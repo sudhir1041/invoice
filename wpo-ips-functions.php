@@ -1578,3 +1578,28 @@ function wpo_wcpdf_format_country_address( string $country_code, array $address 
 
 	return esc_html( $formatted_address );
 }
+
+// Register Completed Invoice document
+add_filter( 'wpo_wcpdf_document_classes', 'wpo_wcpdf_register_completed_invoice' );
+function wpo_wcpdf_register_completed_invoice( $classes ) {
+        $classes['\\WPO\\IPS\\Documents\\CompletedInvoice'] = new \WPO\IPS\Documents\CompletedInvoice();
+        return $classes;
+}
+
+// Add completed invoice download button on My Account page
+add_filter( 'wpo_wcpdf_myaccount_actions', 'wpo_wcpdf_completed_invoice_button', 10, 2 );
+function wpo_wcpdf_completed_invoice_button( $actions, $order ) {
+        if ( is_callable( array( $order, 'get_total' ) ) && is_callable( array( $order, 'get_total_paid' ) ) ) {
+                $due = floatval( $order->get_total() ) - floatval( $order->get_total_paid() );
+                if ( $due <= 0 ) {
+                        $document = wcpdf_get_document( 'completed-invoice', $order );
+                        if ( $document && $document->is_enabled() ) {
+                                $actions['completed_invoice'] = array(
+                                        'url'  => WPO_WCPDF()->endpoint->get_document_link( $order, 'completed-invoice', array( 'my-account' => 'true' ) ),
+                                        'name' => __( 'PDF Invoice All Payments Completed', 'woocommerce-pdf-invoices-packing-slips' ),
+                                );
+                        }
+                }
+        }
+        return $actions;
+}
