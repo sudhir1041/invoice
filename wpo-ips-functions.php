@@ -1578,3 +1578,35 @@ function wpo_wcpdf_format_country_address( string $country_code, array $address 
 
 	return esc_html( $formatted_address );
 }
+
+/**
+ * Add "PDF Invoice All Payments Completed" button when order is fully paid.
+ */
+add_filter( 'wpo_wcpdf_meta_box_actions', function( $actions, $order_id ) {
+    $order = wc_get_order( $order_id );
+    if ( ! $order ) {
+        return $actions;
+    }
+
+    $due = 0;
+    if ( method_exists( $order, 'get_total_paid' ) ) {
+        $due = floatval( $order->get_total() ) - floatval( $order->get_total_paid() );
+    } else {
+        $due = floatval( $order->get_total() );
+    }
+
+    if ( $due <= 0 ) {
+        $document = wcpdf_get_document( 'invoice-paid', $order );
+        if ( $document ) {
+            $url = WPO_WCPDF()->endpoint->get_document_link( $order, $document->get_type() );
+            $actions['invoice-paid'] = array(
+                'url'   => esc_url( $url ),
+                'alt'   => __( 'PDF Invoice All Payments Completed', 'woocommerce-pdf-invoices-packing-slips' ),
+                'title' => __( 'PDF Invoice All Payments Completed', 'woocommerce-pdf-invoices-packing-slips' ),
+                'class' => 'invoice-paid',
+            );
+        }
+    }
+
+    return $actions;
+}, 10, 2 );
