@@ -229,8 +229,11 @@ class Admin {
 		$listing_actions = array();
 		$documents       = WPO_WCPDF()->documents->get_documents( 'enabled', 'any' );
 
-		foreach ( $documents as $document ) {
-			$document_title = $document->get_title();
+               foreach ( $documents as $document ) {
+                       if ( 'paid-invoice' === $document->get_type() && ! wcpdf_order_fully_paid( $order ) ) {
+                               continue;
+                       }
+                       $document_title = $document->get_title();
 			$document_type  = $document->get_type();
 			$icon           = ! empty( $document->icon ) ? $document->icon : WPO_WCPDF()->plugin_url() . '/assets/images/generic_document.svg';
 

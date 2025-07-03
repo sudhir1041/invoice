@@ -118,7 +118,26 @@ function wcpdf_get_invoice( $order, $init = false ) {
 }
 
 function wcpdf_get_packing_slip( $order, $init = false ) {
-	return wcpdf_get_document( 'packing-slip', $order, $init );
+        return wcpdf_get_document( 'packing-slip', $order, $init );
+}
+
+function wcpdf_get_paid_invoice( $order, $init = false ) {
+        return wcpdf_get_document( 'paid-invoice', $order, $init );
+}
+
+function wcpdf_get_order_due_amount( $order ) {
+        $meta_keys = array( '_due_amount', '_wc_deposits_remaining', '_wcdp_remaining_balance' );
+        foreach ( $meta_keys as $key ) {
+                $value = get_post_meta( $order->get_id(), $key, true );
+                if ( '' !== $value ) {
+                        return floatval( $value );
+                }
+        }
+        return 0.0;
+}
+
+function wcpdf_order_fully_paid( $order ) {
+        return abs( wcpdf_get_order_due_amount( $order ) ) < 0.01;
 }
 
 function wcpdf_get_bulk_actions() {

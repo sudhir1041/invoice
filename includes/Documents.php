@@ -43,9 +43,10 @@ class Documents {
 	 * Init document classes.
 	 */
 	public function init() {
-		// Load Invoice & Packing Slip
-		$this->documents['\WPO\IPS\Documents\Invoice']     = new \WPO\IPS\Documents\Invoice();
-		$this->documents['\WPO\IPS\Documents\PackingSlip'] = new \WPO\IPS\Documents\PackingSlip();
+               // Load Invoice, Paid Invoice & Packing Slip
+               $this->documents['\WPO\IPS\Documents\Invoice']      = new \WPO\IPS\Documents\Invoice();
+               $this->documents['\WPO\IPS\Documents\PaidInvoice'] = new \WPO\IPS\Documents\PaidInvoice();
+               $this->documents['\WPO\IPS\Documents\PackingSlip']  = new \WPO\IPS\Documents\PackingSlip();
 
 		// Allow plugins to add their own documents
 		$this->documents = apply_filters( 'wpo_wcpdf_document_classes', $this->documents );
