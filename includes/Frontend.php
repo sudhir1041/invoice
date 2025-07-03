@@ -64,12 +64,21 @@ class Frontend {
 			}
 
 			// Check if invoice has been created already or if status allows download (filter your own array of allowed statuses)
-			if ( $invoice_allowed || in_array( $order->get_status(), apply_filters( 'wpo_wcpdf_myaccount_allowed_order_statuses', array() ) ) ) {
-				$actions['invoice'] = array(
-					'url'  => WPO_WCPDF()->endpoint->get_document_link( $order, 'invoice', array( 'my-account' => 'true' ) ),
-					'name' => apply_filters( 'wpo_wcpdf_myaccount_button_text', $invoice->get_title(), $invoice )
-				);
-			}
+                       if ( $invoice_allowed || in_array( $order->get_status(), apply_filters( 'wpo_wcpdf_myaccount_allowed_order_statuses', array() ) ) ) {
+                               $actions['invoice'] = array(
+                                       'url'  => WPO_WCPDF()->endpoint->get_document_link( $order, 'invoice', array( 'my-account' => 'true' ) ),
+                                       'name' => apply_filters( 'wpo_wcpdf_myaccount_button_text', $invoice->get_title(), $invoice )
+                               );
+                               if ( wcpdf_order_fully_paid( $order ) ) {
+                                       $paid = wcpdf_get_paid_invoice( $order );
+                                       if ( $paid && $paid->is_enabled() ) {
+                                               $actions['paid-invoice'] = array(
+                                                       'url'  => WPO_WCPDF()->endpoint->get_document_link( $order, 'paid-invoice', array( 'my-account' => 'true' ) ),
+                                                       'name' => __( 'PDF Invoice All Payments Completed', 'woocommerce-pdf-invoices-packing-slips' ),
+                                               );
+                                       }
+                               }
+                       }
 		}
 
 		return apply_filters( 'wpo_wcpdf_myaccount_actions', $actions, $order );
