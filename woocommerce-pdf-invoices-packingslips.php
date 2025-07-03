@@ -806,3 +806,35 @@ function WPO_WCPDF() {
 }
 
 WPO_WCPDF(); // load plugin
+
+// Register Full Payment Invoice document
+add_filter( 'wpo_wcpdf_document_classes', function( $documents ) {
+    $documents['\\WPO\\IPS\\Documents\\FullPaymentInvoice'] = new \WPO\IPS\Documents\FullPaymentInvoice();
+    return $documents;
+});
+
+// Add Full Payment Invoice action buttons
+add_filter( 'wpo_wcpdf_listing_actions', function( $actions, $order ) {
+    if ( method_exists( $order, 'is_paid' ) && $order->is_paid() ) {
+        $actions['full-payment-invoice'] = array(
+            'url'          => WPO_WCPDF()->endpoint->get_document_link( $order, 'full-payment-invoice' ),
+            'img'          => WPO_WCPDF()->plugin_url() . '/assets/images/invoice.svg',
+            'alt'          => 'PDF Invoice All Payments Completed',
+            'exists'       => false,
+            'printed'      => false,
+            'class'        => 'full-payment-invoice',
+            'output_format'=> 'pdf',
+        );
+    }
+    return $actions;
+}, 10, 2 );
+
+add_filter( 'wpo_wcpdf_myaccount_actions', function( $actions, $order ) {
+    if ( method_exists( $order, 'is_paid' ) && $order->is_paid() ) {
+        $actions['full-payment-invoice'] = array(
+            'url'  => WPO_WCPDF()->endpoint->get_document_link( $order, 'full-payment-invoice', array( 'my-account' => 'true' ) ),
+            'name' => __( 'PDF Invoice All Payments Completed', 'woocommerce-pdf-invoices-packing-slips' ),
+        );
+    }
+    return $actions;
+}, 10, 2 );
